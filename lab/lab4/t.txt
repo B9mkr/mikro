@@ -1,0 +1,157 @@
+#define F_CPU 1000000L
+
+#include <avr/io.h>
+#include <util/delay.h>
+
+#define LED1 (1<<PA0)
+#define LED2 (1<<PA1)
+#define LED3 (1<<PA2)
+#define LED4 (1<<PA3)
+#define LED5 (1<<PA4)
+#define LED6 (1<<PA5)
+#define LED7 (1<<PA6)
+#define LED8 (1<<PA7)
+
+int main(void)
+{
+	DDRA |= LED1;
+	
+	while (1) {
+		PORTA |= LED1;
+		_delay_ms(80);
+		PORTA |= LED2;
+		_delay_ms(80);
+		PORTA |= LED3;
+		_delay_ms(80);
+		PORTA |= LED4;
+		_delay_ms(80);
+		PORTA |= LED5;
+		_delay_ms(80);
+		PORTA |= LED6;
+		_delay_ms(80);
+		PORTA |= LED7;
+		_delay_ms(80);
+		PORTA |= LED8;
+		_delay_ms(80);
+
+		PORTA &= ~LED8;
+		_delay_ms(80);
+		PORTA &= ~LED7;
+		_delay_ms(80);
+		PORTA &= ~LED6;
+		_delay_ms(80);
+		PORTA &= ~LED5;
+		_delay_ms(80);
+		PORTA &= ~LED4;
+		_delay_ms(80);
+		PORTA &= ~LED3;
+		_delay_ms(80);
+		PORTA &= ~LED2;
+		_delay_ms(80);
+		PORTA &= ~LED1;
+		_delay_ms(80);
+
+	}
+	return 0;
+
+}
+
+-----------------------------------------------
+
+#define F_CPU 1000000L
+
+#include <avr/io.h>
+#include <util/delay.h>
+
+#define LED1 (1<<PA0)
+
+
+int main(void)
+{
+	DDRA |= LED1;
+	
+	while (1) {
+		PORTA |= LED1;
+		_delay_ms(80);
+
+		PORTA &= ~LED1;
+		_delay_ms(80);
+
+	}
+	return 0;
+}
+
+-----------------------------------------------
+
+#define F_CPU 1000000L
+#include <avr/io.h>
+#include <util/delay.h>
+
+
+int main() {
+	unsigned char i, wcisnieto_klawisz, wiecej_niz_jeden, wiersz, kolumna;
+	unsigned char diody[4][4] = {
+		{0b00000001, 0b00000010, 0b00000011, 0b00001010},	//1, 2, 3, 		A
+		{0b00000100, 0b00000101, 0b00000110, 0b00001011},  	//4, 5, 6, 		b
+		{0b00000111, 0b00001000, 0b00001001, 0b00001100},	//7, 8, 9, 		C		
+		{0b00001110, 0b00000000, 0b00001111, 0b00001101}	//*[E], 0, #[F],	d
+	};
+	volatile unsigned char przycisk;
+	while(1) {
+		wcisnieto_klawisz = 0;
+		wiecej_niz_jeden =0;
+		DDRA = 0xF0;
+		PORTA = 0x0F;
+		DDRB = 0xFF;
+		PORTB = 0x00;
+											
+		switch(PINA) {        //sprawdzenie czy jakikolwiek przycisk jest wcisniety
+			case 0b00001111:  //nie wcisnieto zadnego przycisku
+				PORTB = 0x00;
+				break;
+			default:	      //wcisnieto jakikolwiek przycisk, sprawdzam jaki
+
+				for(i=0; i<4;i++) {
+					PORTA = ~_BV(i+4);
+					przycisk = PINA | 0xF0;
+					switch(przycisk) {
+						case 0b11111110: 	//wiersz pierwszy
+							kolumna = i;
+							wiersz = 0;
+							wiecej_niz_jeden++;
+							break;
+						case 0b11111101:	//wiersz drugi
+							kolumna = i;
+							wiersz = 1;
+							wiecej_niz_jeden++;
+							break;
+						case 0b11111011:	//wiersz trzeci
+							kolumna = i;
+							wiersz = 2;
+							wiecej_niz_jeden++;
+							break;
+						case 0b11110111:	//wiersz czwarty
+							kolumna = i;
+							wiersz = 3;
+							wiecej_niz_jeden++;
+							break;
+						case 0b11111111:    //nie wcisnieto zadnego przycisku w danej kolumnie
+							break;
+						default: 			//wcisnieto wiecej niz jeden przycisk
+							wiecej_niz_jeden++;
+							wcisnieto_klawisz=1;
+							break;
+					
+					}
+				}
+				if(wiecej_niz_jeden == 0) {
+					PORTB = 0xFF;
+				}
+				break;
+				
+		}
+		_delay_ms(20);
+	}
+}
+
+
